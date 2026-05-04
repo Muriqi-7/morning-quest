@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Morning Quest</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080810;--bg2:#0e0e1a;--bg3:#141424;--bg4:#1a1a2e;--bg5:#202038;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);--border3:rgba(255,255,255,0.2);
+  --text:#eeeef8;--text2:#9898b8;--text3:#5a5a78;
+  --accent:#6c63ff;--accent2:#9d97ff;--accent3:#c4c1ff;
+  --gold:#fbbf24;--gold2:#fde68a;
+  --green:#10b981;--green2:#6ee7b7;
+  --coral:#f43f5e;--coral2:#fda4af;
+  --amber:#f59e0b;--amber2:#fcd34d;
+  --blue:#3b82f6;--blue2:#93c5fd;
+  --teal:#14b8a6;--teal2:#5eead4;
+  --r:14px;--r-sm:10px;--r-xs:7px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;font-size:15px;line-height:1.4}
+.app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 14px 100px}
+.content::-webkit-scrollbar{display:none}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");pointer-events:none;z-index:100;opacity:.5}
+
+/* HEADER */
+.top-header{padding:14px 14px 0;flex-shrink:0}
+.header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.brand{display:flex;align-items:center;gap:8px}
+.brand-icon{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#a855f7);display:flex;align-items:center;justify-content:center;font-size:16px}
+.brand-name{font-size:19px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(90deg,var(--text),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.streak-badge{background:linear-gradient(135deg,#2d1a00,#3d2500);border:1px solid rgba(251,191,36,0.35);border-radius:20px;padding:5px 10px;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--gold)}
+
+/* RANK CARD */
+.rank-card{background:linear-gradient(135deg,var(--bg3),var(--bg4));border:1px solid var(--border2);border-radius:var(--r);padding:13px 15px;margin-bottom:10px;position:relative;overflow:hidden}
+.rank-card::before{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:radial-gradient(circle,rgba(108,99,255,0.13),transparent 70%);pointer-events:none}
+.rank-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.rank-info{display:flex;align-items:center;gap:10px}
+.rank-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.rank-name-text{font-size:16px;font-weight:700;color:var(--text)}
+.rank-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.xp-chip{background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.3);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--accent2)}
+.xp-bar-wrap{height:5px;background:rgba(255,255,255,0.06);border-radius:20px;overflow:hidden}
+.xp-bar-fill{height:5px;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:20px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.xp-bar-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:4px}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.stat-pill{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:9px;text-align:center}
+.stat-v{font-size:19px;font-weight:700;color:var(--text);line-height:1}
+.stat-l{font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.4px}
+
+/* TABS */
+.tabs{display:flex;gap:5px;padding:0 14px;flex-shrink:0;overflow-x:auto}
+.tabs::-webkit-scrollbar{display:none}
+.tab-btn{flex-shrink:0;padding:8px 13px;border-radius:var(--r-sm);border:1px solid var(--border);background:transparent;color:var(--text3);font-size:13px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .18s;white-space:nowrap}
+.tab-btn.active{background:var(--bg3);color:var(--text);border-color:var(--border2)}
+.section-gap{height:11px;flex-shrink:0}
+.section{display:none}.section.active{display:block}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px;margin-bottom:9px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.card-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px}
+.card-action{font-size:12px;color:var(--accent2);font-weight:500;cursor:pointer;border:none;background:none;font-family:'Outfit',sans-serif;padding:0}
+
+/* DAY SELECTOR */
+.day-selector{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:12px;-webkit-overflow-scrolling:touch}
+.day-selector::-webkit-scrollbar{display:none}
+.day-btn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 9px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--bg3);cursor:pointer;transition:all .18s;min-width:42px}
+.day-btn.active{background:var(--accent);border-color:var(--accent)}
+.day-btn.today-day{border-color:var(--accent2)}
+.day-btn.workday{border-top:2px solid var(--coral)}
+.day-btn.active.workday{border-top:2px solid rgba(255,255,255,.4)}
+.day-btn.specialday{border-top:2px solid var(--teal)}
+.day-dname{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase}
+.day-btn.active .day-dname{color:rgba(255,255,255,.75)}
+.day-dnum{font-size:15px;font-weight:700;color:var(--text)}
+.day-pip{width:4px;height:4px;border-radius:50%;background:var(--coral);margin-top:1px}
+.day-btn.active .day-pip{background:rgba(255,255,255,.7)}
+.day-btn.specialday .day-pip{background:var(--teal)}
+
+/* TIMELINE */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:11px;position:relative}
+.tl-line{position:absolute;left:14px;top:28px;bottom:-4px;width:1px;background:var(--border)}
+.tl-dot-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:28px;padding-top:3px}
+.tl-dot{width:9px;height:9px;border-radius:50%;border:2px solid var(--border2);background:var(--bg);flex-shrink:0}
+.tl-dot.free{border-color:var(--green);background:rgba(16,185,129,.2)}
+.tl-dot.work{border-color:var(--coral);background:rgba(244,63,94,.2)}
+.tl-dot.padel{border-color:var(--teal);background:rgba(20,184,166,.2)}
+.tl-content{flex:1;padding-bottom:11px}
+.tl-time{font-size:11px;color:var(--text3);margin-bottom:1px}
+.tl-name{font-size:13px;font-weight:500;color:var(--text)}
+.tl-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:9px;margin-top:3px;font-weight:600}
+.badge-work{background:rgba(244,63,94,.12);color:var(--coral2)}
+.badge-free{background:rgba(16,185,129,.12);color:var(--green2)}
+.badge-padel{background:rgba(20,184,166,.12);color:var(--teal2)}
+
+/* BANNER */
+.day-banner{border-radius:var(--r-sm);padding:9px 13px;margin-bottom:11px;display:flex;align-items:center;gap:9px;font-size:13px}
+.banner-work{background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.2);color:var(--coral2)}
+.banner-free{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--green2)}
+.banner-padel{background:rgba(20,184,166,.08);border:1px solid rgba(20,184,166,.25);color:var(--teal2)}
+.banner-icon{font-size:18px;flex-shrink:0}
+
+/* MISSIONS */
+.mission-item{display:flex;align-items:flex-start;gap:9px;padding:11px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:7px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.mission-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.p-alta::before{background:var(--coral)}
+.p-media::before{background:var(--amber)}
+.p-baja::before{background:var(--green)}
+.mission-item.done{opacity:.38}
+.mission-item.done .m-name{text-decoration:line-through}
+.m-check{width:21px;height:21px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;transition:all .2s;margin-top:1px}
+.mission-item.done .m-check{background:var(--green);border-color:var(--green)}
+.m-body{flex:1;min-width:0}
+.m-name{font-size:13px;font-weight:500;color:var(--text)}
+.m-meta{font-size:11px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.m-cat{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;font-weight:600}
+.cat-deporte{background:rgba(16,185,129,.15);color:var(--green2)}
+.cat-lectura{background:rgba(59,130,246,.15);color:var(--blue2)}
+.cat-ocio{background:rgba(168,85,247,.15);color:#d8b4fe}
+.cat-hogar{background:rgba(245,158,11,.15);color:var(--amber2)}
+.cat-otro{background:rgba(255,255,255,.08);color:var(--text2)}
+.m-xp{font-size:11px;font-weight:700;padding:3px 7px;background:rgba(108,99,255,.15);color:var(--accent2);border-radius:11px;white-space:nowrap;border:1px solid rgba(108,99,255,.2);flex-shrink:0}
+.m-del{color:var(--text3);font-size:17px;line-height:1;padding:0 2px;flex-shrink:0;margin-top:1px}
+
+/* FORM */
+.add-mission-form{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:13px;margin-bottom:9px}
+.form-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:11px}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:9px}
+.field label{font-size:11px;color:var(--text3);font-weight:500}
+.field input,.field select,.field textarea{background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r-xs);padding:9px 11px;font-size:14px;color:var(--text);font-family:'Outfit',sans-serif;outline:none;transition:border-color .2s;width:100%}
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.field select option{background:var(--bg4)}
+.field textarea{resize:vertical;min-height:54px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.btn{padding:10px 15px;border-radius:var(--r-xs);font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:var(--bg4);color:var(--text);font-family:'Outfit',sans-serif;transition:all .18s;width:100%;text-align:center}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:active{opacity:.85}
+.btn-ai{background:linear-gradient(135deg,rgba(108,99,255,.18),rgba(168,85,247,.18));border-color:rgba(108,99,255,.4);color:var(--accent2);font-size:12px;padding:7px 11px;width:auto}
+.btn-sm{padding:7px 11px;font-size:12px;width:auto}
+
+/* MODIFY */
+.mod-card{background:var(--bg3);border:1px solid rgba(245,158,11,.2);border-radius:var(--r);padding:13px;margin-bottom:9px}
+.mod-header{display:flex;align-items:center;gap:7px;margin-bottom:11px}
+.mod-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0}
+.mod-title{font-size:13px;font-weight:600;color:var(--amber2)}
+
+/* ACHIEVEMENTS */
+.ach-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ach-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px;text-align:center;opacity:.28;transition:all .35s}
+.ach-card.unlocked{opacity:1;border-color:rgba(251,191,36,.3);background:linear-gradient(135deg,var(--bg3),rgba(251,191,36,.04))}
+@keyframes popIn{0%{transform:scale(.8)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+.ach-card.popin{animation:popIn .5s cubic-bezier(.175,.885,.32,1.275)}
+.ach-icon{font-size:24px;margin-bottom:5px}
+.ach-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.ach-desc{font-size:11px;color:var(--text3);line-height:1.3}
+.ach-xp{font-size:11px;font-weight:700;color:var(--gold);margin-top:4px}
+
+/* RANKS */
+.ranks-list{display:flex;flex-direction:column;gap:7px}
+.rank-item{display:flex;align-items:center;gap:11px;padding:11px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);opacity:.35;transition:all .3s}
+.rank-item.current-rank{opacity:1;border-color:var(--accent);background:linear-gradient(135deg,var(--bg3),rgba(108,99,255,.1))}
+.rank-item.achieved-rank{opacity:.65}
+.ri-icon{font-size:22px;flex-shrink:0}
+.ri-info{flex:1}
+.ri-name{font-size:14px;font-weight:600;color:var(--text)}
+.ri-req{font-size:11px;color:var(--text3);margin-top:1px}
+.ri-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:9px}
+.badge-current{background:rgba(108,99,255,.2);color:var(--accent2);border:1px solid rgba(108,99,255,.3)}
+.badge-done{background:rgba(16,185,129,.15);color:var(--green2)}
+.progress-mini{height:3px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:5px}
+.progress-mini-fill{height:3px;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s ease}
+
+/* RECORDS */
+.rec-list{display:flex;flex-direction:column;gap:6px}
+.rec-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm)}
+.rec-icon{font-size:18px;flex-shrink:0}
+.rec-info{flex:1}
+.rec-name{font-size:13px;font-weight:500;color:var(--text)}
+.rec-val{font-size:19px;font-weight:700;color:var(--accent2)}
+
+/* RECENT ACH */
+.recent-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1px solid rgba(251,191,36,.15);border-radius:var(--r-sm);margin-bottom:7px}
+.recent-icon{font-size:22px;flex-shrink:0}
+.recent-name{font-size:13px;font-weight:500;color:var(--text)}
+.recent-date{font-size:11px;color:var(--text3);margin-top:1px}
+.recent-xp{font-size:12px;font-weight:700;color:var(--gold)}
+
+/* SUB TABS */
+.sub-tabs{display:flex;gap:5px;margin-bottom:11px}
+.sub-tab{flex:1;padding:7px;border-radius:var(--r-xs);border:1px solid var(--border);background:transparent;color:var(--text3);font-size:12px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .18s;text-align:center}
+.sub-tab.active{background:var(--bg3);color:var(--text);border-color:var(--border2)}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:20px 16px;color:var(--text3)}
+.empty-icon{font-size:32px;margin-bottom:6px}
+.empty-text{font-size:13px;color:var(--text2);margin-bottom:3px;font-weight:500}
+.empty-sub{font-size:12px;color:var(--text3)}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px;cursor:pointer;border:none;background:none;font-family:'Outfit',sans-serif;transition:all .18s}
+.nav-icon{font-size:19px;line-height:1}
+.nav-label{font-size:10px;font-weight:500;color:var(--text3)}
+.nav-btn.active .nav-label{color:var(--accent2)}
+
+/* TOAST */
+.toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%) translateY(8px);padding:9px 17px;border-radius:22px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:all .3s;z-index:999;white-space:nowrap;max-width:92vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.t-info{background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff}
+.t-success{background:linear-gradient(135deg,var(--green),#059669);color:#fff}
+.t-gold{background:linear-gradient(135deg,#d97706,var(--gold));color:#1a0a00}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="top-header">
+    <div class="header-row">
+      <div class="brand">
+        <div class="brand-icon">🎯</div>
+        <div class="brand-name">Morning Quest</div>
+      </div>
+      <div class="streak-badge">🔥 <span id="streak-num">0</span> días</div>
+    </div>
+    <div class="rank-card">
+      <div class="rank-top">
+        <div class="rank-info">
+          <div class="rank-icon" id="rank-icon">🌱</div>
+          <div>
+            <div class="rank-name-text" id="rank-name">Novato</div>
+            <div class="rank-sub" id="rank-sub">Tu aventura comienza aquí</div>
+          </div>
+        </div>
+        <div class="xp-chip">✨ <span id="xp-total">0</span></div>
+      </div>
+      <div class="xp-bar-wrap"><div class="xp-bar-fill" id="xp-bar" style="width:0%"></div></div>
+      <div class="xp-bar-meta"><span>Nivel <span id="lvl-cur">1</span></span><span><span id="xp-in">0</span> / <span id="xp-need">200</span> XP</span></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-pill"><div class="stat-v" id="stat-lvl">1</div><div class="stat-l">Nivel</div></div>
+      <div class="stat-pill"><div class="stat-v" id="stat-done">0/0</div><div class="stat-l">Hoy</div></div>
+      <div class="stat-pill"><div class="stat-v" id="stat-total">0</div><div class="stat-l">Total</div></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="goTab('hoy',this)">Hoy</button>
+    <button class="tab-btn" onclick="goTab('semana',this)">Semana</button>
+    <button class="tab-btn" onclick="goTab('logros',this)">Logros</button>
+    <button class="tab-btn" onclick="goTab('rangos',this)">Rangos</button>
+    <button class="tab-btn" onclick="goTab('records',this)">Récords</button>
+  </div>
+  <div class="section-gap"></div>
+
+  <div class="content">
+
+    <!-- HOY -->
+    <div class="section active" id="sec-hoy">
+      <div id="day-banner-el"></div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Tu día</div>
+          <button class="card-action" onclick="toggleModify()">Modificar</button>
+        </div>
+        <div class="timeline" id="today-tl"></div>
+      </div>
+      <div id="modify-area" style="display:none">
+        <div class="mod-card">
+          <div class="mod-header"><div class="mod-dot"></div><div class="mod-title">Modificar horario de hoy</div></div>
+          <div class="field"><label>Nota (sustitución, cambio...)</label><input type="text" id="mod-note" placeholder="Ej: Sustitución de última hora"></div>
+          <div class="row2">
+            <div class="field"><label>Hora salida</label><input type="time" id="mod-out"></div>
+            <div class="field"><label>Hora vuelta</label><input type="time" id="mod-back"></div>
+          </div>
+          <div class="row2" style="margin-top:4px">
+            <button class="btn" onclick="cancelMod()">Cancelar</button>
+            <button class="btn btn-primary" onclick="saveMod()">Guardar</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Misiones de hoy</div>
+          <button class="btn-ai btn" onclick="rollMissions()">🎲 Generar misiones</button>
+        </div>
+        <div id="mission-list"></div>
+        <button class="card-action" style="font-size:13px;margin-top:4px" onclick="toggleForm('add-form')">+ Añadir misión manual</button>
+      </div>
+      <div class="add-mission-form" id="add-form" style="display:none">
+        <div class="form-title">Nueva misión</div>
+        <div class="field"><label>Nombre</label><input type="text" id="m-name" placeholder="Ej: Leer 20 páginas..."></div>
+        <div class="row2">
+          <div class="field"><label>Duración (min)</label><input type="number" id="m-dur" placeholder="30" min="5" max="180"></div>
+          <div class="field"><label>Categoría</label>
+            <select id="m-cat"><option value="deporte">🏃 Deporte</option><option value="lectura">📚 Lectura</option><option value="ocio">🎮 Ocio</option><option value="hogar">🏠 Hogar</option><option value="otro">⚙️ Otro</option></select>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Prioridad</label>
+            <select id="m-prio"><option value="alta">🔴 Alta</option><option value="media" selected>🟡 Media</option><option value="baja">🟢 Baja</option></select>
+          </div>
+          <div class="field"><label>Hora (opcional)</label><input type="time" id="m-time"></div>
+        </div>
+        <button class="btn btn-primary" onclick="addMission()">Añadir misión</button>
+      </div>
+    </div>
+
+    <!-- SEMANA -->
+    <div class="section" id="sec-semana">
+      <div class="day-selector" id="week-ds"></div>
+      <div class="card">
+        <div class="card-header"><div class="card-title" id="week-day-lbl">Lunes</div></div>
+        <div class="timeline" id="week-tl"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Misiones planificadas</div>
+          <button class="btn-ai btn" onclick="rollWeekMission()">🎲 Aleatoria</button>
+        </div>
+        <div id="week-ml"></div>
+        <button class="card-action" style="font-size:13px;margin-top:4px" onclick="toggleForm('add-form-w')">+ Añadir</button>
+      </div>
+      <div class="add-mission-form" id="add-form-w" style="display:none">
+        <div class="form-title">Nueva misión para este día</div>
+        <div class="field"><label>Nombre</label><input type="text" id="wm-name" placeholder="Ej: Partida de pádel..."></div>
+        <div class="row2">
+          <div class="field"><label>Duración (min)</label><input type="number" id="wm-dur" placeholder="30"></div>
+          <div class="field"><label>Categoría</label>
+            <select id="wm-cat"><option value="deporte">🏃 Deporte</option><option value="lectura">📚 Lectura</option><option value="ocio">🎮 Ocio</option><option value="hogar">🏠 Hogar</option><option value="otro">⚙️ Otro</option></select>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Prioridad</label>
+            <select id="wm-prio"><option value="alta">🔴 Alta</option><option value="media" selected>🟡 Media</option><option value="baja">🟢 Baja</option></select>
+          </div>
+          <div class="field"><label>Hora (opcional)</label><input type="time" id="wm-time"></div>
+        </div>
+        <button class="btn btn-primary" onclick="addWeekMission()">Añadir</button>
+      </div>
+    </div>
+
+    <!-- LOGROS -->
+    <div class="section" id="sec-logros">
+      <div class="sub-tabs">
+        <button class="sub-tab active" onclick="subTab('ach-all',this)">Todas las insignias</button>
+        <button class="sub-tab" onclick="subTab('ach-recent',this)">Recientes</button>
+      </div>
+      <div id="ach-all"><div class="ach-grid" id="ach-grid"></div></div>
+      <div id="ach-recent" style="display:none"><div id="recent-list"></div></div>
+    </div>
+
+    <!-- RANGOS -->
+    <div class="section" id="sec-rangos">
+      <div style="font-size:13px;color:var(--text3);margin-bottom:11px">Progresa completando misiones. Cada rango desbloquea nuevas recompensas.</div>
+      <div class="ranks-list" id="ranks-list"></div>
+    </div>
+
+    <!-- RÉCORDS -->
+    <div class="section" id="sec-records">
+      <div class="rec-list" id="rec-list"></div>
+    </div>
+
+  </div><!-- end content -->
+
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="goTab('hoy',null,this)"><div class="nav-icon">☀️</div><div class="nav-label">Hoy</div></button>
+    <button class="nav-btn" onclick="goTab('semana',null,this)"><div class="nav-icon">📅</div><div class="nav-label">Semana</div></button>
+    <button class="nav-btn" onclick="goTab('logros',null,this)"><div class="nav-icon">🏆</div><div class="nav-label">Logros</div></button>
+    <button class="nav-btn" onclick="goTab('rangos',null,this)"><div class="nav-icon">⬆️</div><div class="nav-label">Rangos</div></button>
+    <button class="nav-btn" onclick="goTab('records',null,this)"><div class="nav-icon">📊</div><div class="nav-label">Récords</div></button>
+  </div>
+</div>
+
+<div class="toast" id="toast-el"></div>
+
+<script>
+// ─── CONSTANTS ───────────────────────────────────────────────
+const DAYS_S = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const DAYS_L = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const XP_MAP = {alta:35,media:20,baja:10};
+const ICONS = {deporte:'🏃',lectura:'📚',ocio:'🎮',hogar:'🏠',otro:'⚙️'};
+
+const BASE = {
+  0:{type:'special',label:'Turno especial · Club Pádel',blocks:[
+    {time:'08:00',name:'Turno mañana',type:'work',end:'14:00'},
+    {time:'14:00',name:'🎾 Pausa libre — Pádel / Comida',type:'padel',end:'16:00'},
+    {time:'16:00',name:'Turno tarde',type:'work',end:'20:00'},
+    {time:'20:00',name:'Vuelta a casa 🏠',type:'free'},
+  ]},
+  1:{type:'work',label:'Turno tarde · Club Pádel',blocks:[
+    {time:'16:00',name:'Salida al trabajo',type:'work'},
+    {time:'16:00',name:'Turno trabajo',type:'work',end:'00:00'},
+    {time:'00:00',name:'Vuelta a casa 🏠',type:'free'},
+  ]},
+  2:{type:'work',label:'Turno corto · Club Pádel',blocks:[
+    {time:'17:15',name:'Salida al trabajo',type:'work'},
+    {time:'17:15',name:'Turno trabajo',type:'work',end:'21:45'},
+    {time:'21:45',name:'Vuelta a casa 🏠',type:'free'},
+  ]},
+  3:{type:'work',label:'Turno tarde · Club Pádel',blocks:[
+    {time:'16:00',name:'Salida al trabajo',type:'work'},
+    {time:'16:00',name:'Turno trabajo',type:'work',end:'00:00'},
+    {time:'00:00',name:'Vuelta a casa 🏠',type:'free'},
+  ]},
+  4:{type:'work',label:'Turno tarde · Club Pádel',blocks:[
+    {time:'16:00',name:'Salida al trabajo',type:'work'},
+    {time:'16:00',name:'Turno trabajo',type:'work',end:'00:00'},
+    {time:'00:00',name:'Vuelta a casa 🏠',type:'free'},
+  ]},
+  5:{type:'free',label:'Día libre 🎉',blocks:[]},
+  6:{type:'free',label:'Día libre 🎉',blocks:[]},
+};
+
+const RANKS = [
+  {id:'novato',name:'Novato',icon:'🌱',min:0,max:200,desc:'El inicio de todo'},
+  {id:'aprendiz',name:'Aprendiz',icon:'📖',min:200,max:600,desc:'Cogiendo el ritmo'},
+  {id:'constante',name:'Constante',icon:'⚡',min:600,max:1400,desc:'La constancia es tu fuerza'},
+  {id:'dedicado',name:'Dedicado',icon:'🔥',min:1400,max:3000,desc:'Comprometido con el cambio'},
+  {id:'experto',name:'Experto',icon:'🏅',min:3000,max:6000,desc:'Has dominado la rutina'},
+  {id:'maestro',name:'Maestro',icon:'👑',min:6000,max:12000,desc:'Nivel élite de organización'},
+  {id:'leyenda',name:'Leyenda',icon:'🌟',min:12000,max:Infinity,desc:'Productividad legendaria'},
+];
+
+const ACH = [
+  {id:'a1',icon:'⚡',name:'Primera misión',desc:'Completa tu primera tarea',xp:50,check:s=>s.tm>=1},
+  {id:'a2',icon:'📚',name:'Primera lectura',desc:'Completa una misión de lectura',xp:40,check:s=>(s.cc?.lectura||0)>=1},
+  {id:'a3',icon:'🏃',name:'Primer entreno',desc:'Completa una misión de deporte',xp:40,check:s=>(s.cc?.deporte||0)>=1},
+  {id:'a4',icon:'🔥',name:'3 días seguidos',desc:'Racha de 3 días',xp:80,check:s=>s.streak>=3},
+  {id:'a5',icon:'💫',name:'Semana perfecta',desc:'Racha de 7 días',xp:180,check:s=>s.streak>=7},
+  {id:'a6',icon:'🌙',name:'Dos semanas',desc:'Racha de 14 días',xp:350,check:s=>s.streak>=14},
+  {id:'a7',icon:'🏔️',name:'Mes de hierro',desc:'Racha de 30 días',xp:800,check:s=>s.streak>=30},
+  {id:'a8',icon:'🎯',name:'10 misiones',desc:'Completa 10 misiones',xp:100,check:s=>s.tm>=10},
+  {id:'a9',icon:'🏹',name:'50 misiones',desc:'Completa 50 misiones',xp:280,check:s=>s.tm>=50},
+  {id:'a10',icon:'🏆',name:'Centurión',desc:'100 misiones completadas',xp:600,check:s=>s.tm>=100},
+  {id:'a11',icon:'💪',name:'Deportista',desc:'10 misiones de deporte',xp:140,check:s=>(s.cc?.deporte||0)>=10},
+  {id:'a12',icon:'📖',name:'Bibliófilo',desc:'10 misiones de lectura',xp:140,check:s=>(s.cc?.lectura||0)>=10},
+  {id:'a13',icon:'🎾',name:'As del Pádel',desc:'5 sesiones de pádel los domingos',xp:200,check:s=>(s.padel||0)>=5},
+  {id:'a14',icon:'🎾',name:'Pro del Pádel',desc:'20 sesiones de pádel',xp:400,check:s=>(s.padel||0)>=20},
+  {id:'a15',icon:'📖',name:'Aprendiz',desc:'Alcanza el rango Aprendiz',xp:100,check:s=>s.xp>=200},
+  {id:'a16',icon:'⚡',name:'Constante',desc:'Alcanza el rango Constante',xp:150,check:s=>s.xp>=600},
+  {id:'a17',icon:'🔥',name:'Dedicado',desc:'Alcanza el rango Dedicado',xp:200,check:s=>s.xp>=1400},
+  {id:'a18',icon:'🏅',name:'Experto',desc:'Alcanza el rango Experto',xp:350,check:s=>s.xp>=3000},
+  {id:'a19',icon:'👑',name:'Maestro',desc:'Alcanza el rango Maestro',xp:500,check:s=>s.xp>=6000},
+  {id:'a20',icon:'🌟',name:'Leyenda',desc:'¡Eres una leyenda!',xp:1000,check:s=>s.xp>=12000},
+];
+
+// ─── STATE ───────────────────────────────────────────────────
+let S = JSON.parse(localStorage.getItem('mq3')||'null') || {
+  xp:0, streak:0, lastDate:null,
+  tm:0, // totalMissions
+  cc:{deporte:0,lectura:0,ocio:0,hogar:0,otro:0},
+  padel:0,
+  ua:[], // unlocked achievements
+  ra:[], // recent achievements [{id,icon,name,xp,date}]
+  ms:{}, // missions by date YYYY-MM-DD
+  wm:{}, // week missions by dow 0-6
+  ov:{}, // day overrides by date
+  rec:{maxStreak:0,totalDays:0}
+};
+function save(){ localStorage.setItem('mq3', JSON.stringify(S)); }
+function todayStr(){ return new Date().toISOString().split('T')[0]; }
+function todayDow(){ return new Date().getDay(); }
+function yStr(){ const y=new Date(); y.setDate(y.getDate()-1); return y.toISOString().split('T')[0]; }
+
+// ─── NAV ─────────────────────────────────────────────────────
+let curTab = 'hoy', curWeekDow = todayDow();
+
+function goTab(id, tabEl, navEl){
+  curTab = id;
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(n=>n.classList.remove('active'));
+  const idx = {hoy:0,semana:1,logros:2,rangos:3,records:4}[id];
+  if(idx!==undefined){
+    document.querySelectorAll('.tab-btn')[idx]?.classList.add('active');
+    document.querySelectorAll('.nav-btn')[idx]?.classList.add('active');
+  }
+  if(id==='semana') renderWeek();
+  if(id==='logros') renderAch();
+  if(id==='rangos') renderRanks();
+  if(id==='records') renderRec();
+}
+
+function subTab(id, btn){
+  ['ach-all','ach-recent'].forEach(i=>{ const el=document.getElementById(i); if(el) el.style.display='none'; });
+  document.getElementById(id).style.display='';
+  document.querySelectorAll('.sub-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  if(id==='ach-recent') renderRecentAch();
+}
+
+function toggleForm(id){ const el=document.getElementById(id); el.style.display=el.style.display==='none'?'':'none'; }
+
+// ─── TOAST ───────────────────────────────────────────────────
+function toast(msg, type='info'){
+  const el=document.getElementById('toast-el');
+  el.textContent=msg; el.className='toast t-'+type+' show';
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+// ─── STATS ───────────────────────────────────────────────────
+function getRank(xp){ let r=RANKS[0]; for(const rk of RANKS){ if(xp>=rk.min) r=rk; } return r; }
+
+function updateStats(){
+  const rk = getRank(S.xp);
+  const nxt = RANKS[RANKS.indexOf(rk)+1];
+  const inR = S.xp - rk.min;
+  const need = nxt ? nxt.min - rk.min : 1;
+  const pct = nxt ? Math.min(100,Math.round((inR/need)*100)) : 100;
+  const lvl = RANKS.indexOf(rk)+1;
+  document.getElementById('rank-icon').textContent = rk.icon;
+  document.getElementById('rank-name').textContent = rk.name;
+  document.getElementById('rank-sub').textContent = 'Nivel '+lvl+' · '+rk.desc;
+  document.getElementById('xp-total').textContent = S.xp;
+  document.getElementById('xp-bar').style.width = pct+'%';
+  document.getElementById('lvl-cur').textContent = lvl;
+  document.getElementById('xp-in').textContent = inR;
+  document.getElementById('xp-need').textContent = nxt ? need : '∞';
+  document.getElementById('stat-lvl').textContent = lvl;
+  document.getElementById('streak-num').textContent = S.streak;
+  const ms = S.ms[todayStr()]||[];
+  document.getElementById('stat-done').textContent = ms.filter(m=>m.done).length+'/'+ms.length;
+  document.getElementById('stat-total').textContent = S.tm||0;
+  checkAchievements();
+  save();
+}
+
+// ─── STREAK ──────────────────────────────────────────────────
+function updateStreak(){
+  const t = todayStr();
+  if(S.lastDate===t) return;
+  if(S.lastDate===yStr()) S.streak=(S.streak||0)+1;
+  else S.streak=1;
+  S.lastDate=t;
+  if(S.streak>(S.rec.maxStreak||0)) S.rec.maxStreak=S.streak;
+  S.rec.totalDays=(S.rec.totalDays||0)+1;
+}
+
+// ─── SCHEDULE ────────────────────────────────────────────────
+function getSched(dateStr){
+  const dow = new Date(dateStr+'T12:00').getDay();
+  const base = JSON.parse(JSON.stringify(BASE[dow]||{type:'free',label:'Día libre',blocks:[]}));
+  const ov = S.ov[dateStr];
+  if(ov && (ov.out||ov.back)){
+    base.blocks = base.blocks.map(b=>{
+      const firstWork = base.blocks.find(bl=>bl.type==='work');
+      if(b===firstWork && ov.out) b.time=ov.out;
+      if(b.type==='free' && ov.back) b.time=ov.back;
+      return b;
+    });
+    if(ov.note) base.note=ov.note;
+  }
+  return {dow,...base};
+}
+
+function renderTL(blocks, elId){
+  const el=document.getElementById(elId);
+  if(!blocks||!blocks.length){ el.innerHTML='<div class="empty-state"><div class="empty-icon">🌿</div><div class="empty-text">Día libre</div><div class="empty-sub">Sin trabajo programado</div></div>'; return; }
+  el.innerHTML=blocks.map((b,i)=>`
+    <div class="tl-item">
+      <div class="tl-dot-wrap">
+        <div class="tl-dot ${b.type}"></div>
+        ${i<blocks.length-1?'<div class="tl-line"></div>':''}
+      </div>
+      <div class="tl-content">
+        <div class="tl-time">${b.time}${b.end?' – '+b.end:''}</div>
+        <div class="tl-name">${b.name}</div>
+        ${b.type==='padel'?'<span class="tl-badge badge-padel">2h libres · pádel / comida</span>':b.type==='work'?'<span class="tl-badge badge-work">Trabajo</span>':b.type==='free'?'<span class="tl-badge badge-free">Libre</span>':''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderBanner(){
+  const s=getSched(todayStr());
+  const el=document.getElementById('day-banner-el');
+  const dn=DAYS_L[s.dow];
+  if(s.dow===0){ el.className='day-banner banner-padel'; el.innerHTML='<div class="banner-icon">🎾</div><div><strong>'+dn+'</strong> · '+s.label+'<br><span style="font-size:11px;opacity:.75">Aprovecha las 2h del mediodía en el club</span></div>'; }
+  else if(s.type==='work'){ el.className='day-banner banner-work'; el.innerHTML='<div class="banner-icon">🏓</div><div><strong>'+dn+'</strong> · '+s.label+'</div>'; }
+  else { el.className='day-banner banner-free'; el.innerHTML='<div class="banner-icon">🌿</div><div><strong>'+dn+'</strong> · '+s.label+'</div>'; }
+}
+
+// ─── TODAY ───────────────────────────────────────────────────
+function renderToday(){
+  const s=getSched(todayStr());
+  renderBanner();
+  renderTL(s.blocks,'today-tl');
+  renderMissions();
+}
+
+function renderMissions(){
+  const ms=S.ms[todayStr()]||[];
+  const el=document.getElementById('mission-list');
+  if(!ms.length){ el.innerHTML='<div class="empty-state" style="padding:10px 0"><div class="empty-icon">📋</div><div class="empty-text">Sin misiones</div><div class="empty-sub">Genera con IA o añade manualmente</div></div>'; updateStats(); return; }
+  el.innerHTML=ms.map((m,i)=>`
+    <div class="mission-item p-${m.p||'media'} ${m.done?'done':''}" onclick="toggleM(${i})">
+      <div class="m-check">${m.done?'✓':''}</div>
+      <div class="m-body">
+        <div class="m-name">${esc(m.name)}</div>
+        <div class="m-meta">
+          <span class="m-cat cat-${m.cat||'otro'}">${ICONS[m.cat]||'⚙️'} ${m.cat||'otro'}</span>
+          ${m.dur?'<span>'+m.dur+' min</span>':''}
+          ${m.time?'<span>'+m.time+'</span>':''}
+        </div>
+      </div>
+      <div class="m-xp">+${m.xp} XP</div>
+      <div class="m-del" onclick="delM(event,${i})">×</div>
+    </div>
+  `).join('');
+  updateStats();
+}
+
+function toggleM(i){
+  const ms=S.ms[todayStr()];
+  if(!ms) return;
+  const m=ms[i];
+  if(m.done){
+    m.done=false; S.xp=Math.max(0,S.xp-m.xp);
+    S.tm=Math.max(0,(S.tm||0)-1);
+    if(m.cat && S.cc[m.cat]) S.cc[m.cat]=Math.max(0,(S.cc[m.cat]||0)-1);
+    toast('Misión desmarcada');
+  } else {
+    m.done=true; S.xp+=m.xp;
+    S.tm=(S.tm||0)+1;
+    if(m.cat) S.cc[m.cat]=(S.cc[m.cat]||0)+1;
+    if(m.cat==='deporte' && todayDow()===0) S.padel=(S.padel||0)+1;
+    updateStreak();
+    toast('+'+m.xp+' XP ✨','success');
+  }
+  renderMissions();
+}
+
+function delM(e,i){ e.stopPropagation(); const ms=S.ms[todayStr()]; if(!ms) return; ms.splice(i,1); renderMissions(); }
+
+function addMission(){
+  const name=document.getElementById('m-name').value.trim();
+  const dur=parseInt(document.getElementById('m-dur').value)||30;
+  const cat=document.getElementById('m-cat').value;
+  const p=document.getElementById('m-prio').value;
+  const time=document.getElementById('m-time').value;
+  if(!name){toast('Escribe el nombre');return;}
+  if(!S.ms[todayStr()]) S.ms[todayStr()]=[];
+  S.ms[todayStr()].push({name,dur,cat,p,time,xp:XP_MAP[p],done:false});
+  ['m-name','m-dur','m-time'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('add-form').style.display='none';
+  renderMissions(); toast('Misión añadida!');
+}
+
+// ─── MISSION POOL (60+ misiones personalizadas) ──────────────
+const POOL = [
+  // DEPORTE - ejercicio en casa
+  {name:'10 minutos de estiramientos al despertar',dur:10,cat:'deporte',p:'media'},
+  {name:'3 series de 15 flexiones',dur:10,cat:'deporte',p:'alta'},
+  {name:'3 series de 20 abdominales',dur:10,cat:'deporte',p:'alta'},
+  {name:'Rutina de 20 min de ejercicio en casa',dur:20,cat:'deporte',p:'alta'},
+  {name:'Sentadillas: 4 series de 15 repeticiones',dur:12,cat:'deporte',p:'media'},
+  {name:'Plancha: 3 series de 45 segundos',dur:8,cat:'deporte',p:'media'},
+  {name:'Burpees: 3 series de 10 repeticiones',dur:10,cat:'deporte',p:'alta'},
+  {name:'Salir a caminar al menos 30 minutos',dur:30,cat:'deporte',p:'alta'},
+  {name:'Salir a correr 20 minutos',dur:20,cat:'deporte',p:'alta'},
+  {name:'Ruta de running de 5 km',dur:35,cat:'deporte',p:'alta'},
+  {name:'Yoga o movilidad articular: 15 minutos',dur:15,cat:'deporte',p:'media'},
+  {name:'Ejercicio de respiración y meditación: 10 min',dur:10,cat:'deporte',p:'baja'},
+  {name:'Saltar a la comba 10 minutos',dur:10,cat:'deporte',p:'media'},
+  {name:'Zancadas y ejercicios de piernas: 15 min',dur:15,cat:'deporte',p:'media'},
+  {name:'Entrenamiento HIIT de 15 minutos',dur:15,cat:'deporte',p:'alta'},
+  {name:'Paseo activo escuchando un podcast',dur:40,cat:'deporte',p:'baja'},
+  {name:'Fondos en silla: 3 series de 12',dur:8,cat:'deporte',p:'media'},
+  // DEPORTE - pádel (especial domingos)
+  {name:'Calentar en la pista antes del turno',dur:20,cat:'deporte',p:'alta'},
+  {name:'Practicar saques y bandeja en la pista',dur:30,cat:'deporte',p:'alta'},
+  {name:'Partido de pádel con compañeros del club',dur:60,cat:'deporte',p:'alta'},
+  {name:'Trabajar el revés y el globo en la pista',dur:25,cat:'deporte',p:'media'},
+  // LECTURA
+  {name:'Leer 20 páginas del libro actual',dur:25,cat:'lectura',p:'media'},
+  {name:'Leer 30 páginas del libro actual',dur:35,cat:'lectura',p:'media'},
+  {name:'Escuchar un capítulo de audiolibro',dur:30,cat:'lectura',p:'baja'},
+  {name:'Escuchar un episodio de podcast que tengas pendiente',dur:30,cat:'lectura',p:'baja'},
+  {name:'Leer artículos interesantes guardados',dur:20,cat:'lectura',p:'baja'},
+  {name:'Leer las noticias del día durante 15 minutos',dur:15,cat:'lectura',p:'baja'},
+  {name:'Avanzar un capítulo completo del libro',dur:40,cat:'lectura',p:'media'},
+  {name:'Buscar y empezar un nuevo libro o podcast',dur:20,cat:'lectura',p:'baja'},
+  {name:'Releer notas o subrayados de lecturas anteriores',dur:15,cat:'lectura',p:'baja'},
+  {name:'Escuchar podcast mientras desayunas',dur:20,cat:'lectura',p:'baja'},
+  // HOGAR - limpieza
+  {name:'Ordenar y hacer la cama al levantarte',dur:5,cat:'hogar',p:'alta'},
+  {name:'Limpiar y ordenar la habitación completa',dur:20,cat:'hogar',p:'media'},
+  {name:'Limpiar la cocina a fondo',dur:25,cat:'hogar',p:'media'},
+  {name:'Pasar la aspiradora por el piso',dur:20,cat:'hogar',p:'media'},
+  {name:'Fregar el suelo del piso',dur:25,cat:'hogar',p:'media'},
+  {name:'Limpiar el baño completo',dur:20,cat:'hogar',p:'media'},
+  {name:'Hacer la colada y ponerla a secar',dur:15,cat:'hogar',p:'media'},
+  {name:'Doblar y guardar la ropa limpia',dur:15,cat:'hogar',p:'baja'},
+  {name:'Limpiar el polvo de los muebles',dur:15,cat:'hogar',p:'baja'},
+  {name:'Ordenar el armario o cajones',dur:20,cat:'hogar',p:'baja'},
+  {name:'Sacar la basura y separar el reciclaje',dur:5,cat:'hogar',p:'alta'},
+  {name:'Limpiar los cristales y ventanas',dur:20,cat:'hogar',p:'baja'},
+  {name:'Ordenar la despensa o nevera',dur:15,cat:'hogar',p:'baja'},
+  {name:'Limpiar el microondas y electrodomésticos',dur:15,cat:'hogar',p:'baja'},
+  {name:'Revisar y tirar lo que ya no usas',dur:30,cat:'hogar',p:'baja'},
+  {name:'Preparar y dejar la ropa lista para mañana',dur:5,cat:'hogar',p:'media'},
+  {name:'Hacer la compra semanal',dur:40,cat:'hogar',p:'alta'},
+  {name:'Planificar el menú de la semana',dur:15,cat:'hogar',p:'media'},
+  {name:'Cocinar algo saludable para el día',dur:30,cat:'hogar',p:'media'},
+  // OCIO
+  {name:'Partida a un videojuego sin culpa: 45 min',dur:45,cat:'ocio',p:'baja'},
+  {name:'Ver un episodio de una serie pendiente',dur:45,cat:'ocio',p:'baja'},
+  {name:'Escuchar un álbum completo que tengas pendiente',dur:40,cat:'ocio',p:'baja'},
+  {name:'Quedar o llamar a un amigo o familiar',dur:30,cat:'ocio',p:'media'},
+  {name:'Pasear sin destino fijo y desconectar',dur:30,cat:'ocio',p:'baja'},
+  {name:'Explorar un barrio o zona nueva de tu ciudad',dur:60,cat:'ocio',p:'baja'},
+  {name:'Disfrutar del desayuno con calma y sin móvil',dur:20,cat:'ocio',p:'baja'},
+  {name:'Ver una peli corta o un documental',dur:60,cat:'ocio',p:'baja'},
+  {name:'Jugar a algo de mesa o de cartas',dur:30,cat:'ocio',p:'baja'},
+  {name:'Descubrir música nueva durante 30 minutos',dur:30,cat:'ocio',p:'baja'},
+  {name:'Escribir en un diario o apuntar ideas',dur:15,cat:'ocio',p:'baja'},
+  {name:'Hacer algo creativo: dibujar, escribir, fotografiar...',dur:30,cat:'ocio',p:'baja'},
+  {name:'Planificar un plan chulo para el fin de semana',dur:15,cat:'ocio',p:'baja'},
+  {name:'Tomar un café tranquilo en una terraza',dur:30,cat:'ocio',p:'baja'},
+];
+
+// Evita repetir las últimas misiones usadas
+function getRecentlyUsed(){ return (S.ms[todayStr()]||[]).map(m=>m.name); }
+
+function pickRandom(count=1, excludeNames=[]){
+  const available = POOL.filter(m => !excludeNames.includes(m.name));
+  const shuffled = [...available].sort(()=>Math.random()-.5);
+  return shuffled.slice(0, count);
+}
+
+function rollMissions(){
+  const existing = (S.ms[todayStr()]||[]).map(m=>m.name);
+  const picks = pickRandom(4, existing);
+  if(!picks.length){ toast('Ya tienes todas las misiones del banco añadidas 💪'); return; }
+  if(!S.ms[todayStr()]) S.ms[todayStr()]=[];
+  picks.forEach(m=>S.ms[todayStr()].push({...m, xp:XP_MAP[m.p], done:false}));
+  renderMissions(); toast('4 misiones añadidas 🎲','info');
+}
+
+function rollWeekMission(){
+  const existing = (S.wm[curWeekDow]||[]).map(m=>m.name);
+  const picks = pickRandom(1, existing);
+  if(!picks.length){ toast('¡Ya tienes muchas misiones para este día!'); return; }
+  if(!S.wm[curWeekDow]) S.wm[curWeekDow]=[];
+  S.wm[curWeekDow].push({...picks[0], xp:XP_MAP[picks[0].p], done:false});
+  save(); renderWeekML(); toast('Misión aleatoria añadida 🎲','info');
+}
+
+// ─── MODIFY DAY ──────────────────────────────────────────────
+function toggleModify(){ const el=document.getElementById('modify-area'); el.style.display=el.style.display==='none'?'':'none'; const ov=S.ov[todayStr()]||{}; document.getElementById('mod-note').value=ov.note||''; document.getElementById('mod-out').value=ov.out||''; document.getElementById('mod-back').value=ov.back||''; }
+function cancelMod(){ document.getElementById('modify-area').style.display='none'; }
+function saveMod(){
+  S.ov[todayStr()]={note:document.getElementById('mod-note').value,out:document.getElementById('mod-out').value,back:document.getElementById('mod-back').value};
+  document.getElementById('modify-area').style.display='none';
+  save(); renderToday(); toast('Horario actualizado ✅','success');
+}
+
+// ─── WEEK ────────────────────────────────────────────────────
+function renderWeek(){ renderWeekDS(); renderWeekDay(); }
+
+function renderWeekDS(){
+  const el=document.getElementById('week-ds');
+  const now=new Date(); const todDow=now.getDay();
+  const days=[];
+  for(let i=0;i<7;i++){ const d=new Date(now); d.setDate(now.getDate()-todDow+i); days.push(d); }
+  el.innerHTML=days.map(d=>{
+    const dow=d.getDay(); const sched=BASE[dow];
+    const isWork=sched&&sched.type!=='free'; const isSpecial=dow===0;
+    const isCur=dow===curWeekDow; const isToday=d.toDateString()===now.toDateString();
+    return `<button class="day-btn${isCur?' active':''}${isToday?' today-day':''}${isSpecial?' specialday':isWork?' workday':''}" onclick="selWeekDay(${dow},this)">
+      <div class="day-dname">${DAYS_S[dow]}</div>
+      <div class="day-dnum">${d.getDate()}</div>
+      ${isWork||isSpecial?'<div class="day-pip"></div>':'<div style="height:4px"></div>'}
+    </button>`;
+  }).join('');
+}
+
+function selWeekDay(dow,btn){ curWeekDow=dow; document.querySelectorAll('#week-ds .day-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderWeekDay(); }
+
+function renderWeekDay(){
+  const s=BASE[curWeekDow];
+  document.getElementById('week-day-lbl').textContent=DAYS_L[curWeekDow];
+  renderTL(s?.blocks||[],'week-tl');
+  renderWeekML();
+}
+
+function renderWeekML(){
+  const ms=S.wm[curWeekDow]||[];
+  const el=document.getElementById('week-ml');
+  if(!ms.length){ el.innerHTML='<div style="font-size:13px;color:var(--text3);padding:6px 0">Sin misiones planificadas para este día.</div>'; return; }
+  el.innerHTML=ms.map((m,i)=>`
+    <div class="mission-item p-${m.p||'media'}">
+      <div class="m-check"></div>
+      <div class="m-body">
+        <div class="m-name">${esc(m.name)}</div>
+        <div class="m-meta"><span class="m-cat cat-${m.cat||'otro'}">${ICONS[m.cat]||'⚙️'} ${m.cat||'otro'}</span>${m.dur?'<span>'+m.dur+' min</span>':''}</div>
+      </div>
+      <div class="m-xp">+${m.xp} XP</div>
+      <div class="m-del" onclick="delWM(event,${i})">×</div>
+    </div>
+  `).join('');
+}
+
+function addWeekMission(){
+  const name=document.getElementById('wm-name').value.trim();
+  const dur=parseInt(document.getElementById('wm-dur').value)||30;
+  const cat=document.getElementById('wm-cat').value;
+  const p=document.getElementById('wm-prio').value;
+  const time=document.getElementById('wm-time').value;
+  if(!name){toast('Escribe el nombre');return;}
+  if(!S.wm[curWeekDow]) S.wm[curWeekDow]=[];
+  S.wm[curWeekDow].push({name,dur,cat,p,time,xp:XP_MAP[p],done:false});
+  ['wm-name','wm-dur','wm-time'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('add-form-w').style.display='none';
+  save(); renderWeekML(); toast('Misión añadida!');
+}
+
+function delWM(e,i){ e.stopPropagation(); S.wm[curWeekDow].splice(i,1); save(); renderWeekML(); }
+
+// ─── ACHIEVEMENTS ────────────────────────────────────────────
+function checkAchievements(){
+  let newOnes=[];
+  ACH.forEach(a=>{ if(!S.ua.includes(a.id)&&a.check(S)){ S.ua.push(a.id); S.xp+=a.xp; S.ra=S.ra||[]; S.ra.unshift({id:a.id,icon:a.icon,name:a.name,xp:a.xp,date:todayStr()}); if(S.ra.length>30) S.ra.pop(); newOnes.push(a); } });
+  if(newOnes.length){ setTimeout(()=>{ newOnes.forEach(a=>toast('🏆 '+a.name+' desbloqueado! +'+a.xp+' XP','gold')); },400); save(); }
+}
+
+function renderAch(){
+  document.getElementById('ach-grid').innerHTML=ACH.map(a=>{
+    const u=S.ua.includes(a.id);
+    return `<div class="ach-card ${u?'unlocked':''}"><div class="ach-icon">${a.icon}</div><div class="ach-name">${a.name}</div><div class="ach-desc">${a.desc}</div><div class="ach-xp">${u?'✓ Desbloqueado':'+'+a.xp+' XP'}</div></div>`;
+  }).join('');
+}
+
+function renderRecentAch(){
+  const el=document.getElementById('recent-list');
+  if(!(S.ra&&S.ra.length)){ el.innerHTML='<div class="empty-state"><div class="empty-icon">🏆</div><div class="empty-text">Aún sin logros</div><div class="empty-sub">Completa misiones para desbloquear insignias</div></div>'; return; }
+  el.innerHTML=S.ra.map(a=>`<div class="recent-item"><div class="recent-icon">${a.icon}</div><div class="m-body"><div class="recent-name">${a.name}</div><div class="recent-date">${a.date}</div></div><div class="recent-xp">+${a.xp} XP</div></div>`).join('');
+}
+
+// ─── RANKS ───────────────────────────────────────────────────
+function renderRanks(){
+  const cur=getRank(S.xp);
+  document.getElementById('ranks-list').innerHTML=RANKS.map(r=>{
+    const isCur=r.id===cur.id; const isDone=S.xp>=r.min&&!isCur;
+    const pct=isCur&&RANKS[RANKS.indexOf(r)+1]?Math.round(((S.xp-r.min)/(RANKS[RANKS.indexOf(r)+1].min-r.min))*100):100;
+    return `<div class="rank-item ${isCur?'current-rank':''} ${isDone?'achieved-rank':''}">
+      <div class="ri-icon">${r.icon}</div>
+      <div class="ri-info">
+        <div class="ri-name">${r.name}</div>
+        <div class="ri-req">${r.min===0?'Rango inicial':'Desde '+r.min+' XP'} · ${r.desc}</div>
+        ${isCur?'<div class="progress-mini"><div class="progress-mini-fill" style="width:'+pct+'%"></div></div>':''}
+      </div>
+      ${isCur?'<span class="ri-badge badge-current">Actual</span>':isDone?'<span class="ri-badge badge-done">✓</span>':''}
+    </div>`;
+  }).join('');
+}
+
+// ─── RECORDS ─────────────────────────────────────────────────
+function renderRec(){
+  const rk=getRank(S.xp);
+  const items=[
+    {icon:'🔥',name:'Racha actual',val:(S.streak||0)+' días'},
+    {icon:'🏔️',name:'Racha máxima histórica',val:(S.rec.maxStreak||0)+' días'},
+    {icon:'✅',name:'Misiones completadas',val:S.tm||0},
+    {icon:'✨',name:'XP total acumulado',val:S.xp},
+    {icon:'📅',name:'Días activos',val:S.rec.totalDays||0},
+    {icon:'🏃',name:'Misiones de deporte',val:S.cc?.deporte||0},
+    {icon:'📚',name:'Misiones de lectura',val:S.cc?.lectura||0},
+    {icon:'🎮',name:'Misiones de ocio',val:S.cc?.ocio||0},
+    {icon:'🎾',name:'Sesiones de pádel',val:S.padel||0},
+    {icon:'🏆',name:'Logros desbloqueados',val:(S.ua?.length||0)+'/'+ACH.length},
+    {icon:'👑',name:'Rango actual',val:rk.name+' '+rk.icon},
+  ];
+  document.getElementById('rec-list').innerHTML=items.map(it=>`<div class="rec-item"><div class="rec-icon">${it.icon}</div><div class="rec-info"><div class="rec-name">${it.name}</div></div><div class="rec-val">${it.val}</div></div>`).join('');
+}
+
+// ─── UTILS ───────────────────────────────────────────────────
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+// ─── INIT ────────────────────────────────────────────────────
+updateStreak();
+updateStats();
+renderToday();
+</script>
+</body>
+</html>
